@@ -51,3 +51,9 @@ mobile/ios/Flutter/Flutter.podspec
 *.swo
 .DS_Store
 Thumbs.db
+
+# ─── APK / Binaires ──────────────────────────────────────────────────────────
+*.apk
+*.aab
+*.ipa
+"APK deja réalisé/"
