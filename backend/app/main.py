@@ -13,13 +13,14 @@ from sqlalchemy import text
 
 Base.metadata.create_all(bind=engine)
 
-# SQLite migration: add last_seen column if missing
-try:
-    with engine.connect() as _conn:
-        _conn.execute(text("ALTER TABLE utilisateurs ADD COLUMN last_seen DATETIME"))
-        _conn.commit()
-except Exception:
-    pass
+# SQLite migration: add last_seen column if missing (SQLite only)
+if "sqlite" in settings.DATABASE_URL.lower():
+    try:
+        with engine.connect() as _conn:
+            _conn.execute(text("ALTER TABLE utilisateurs ADD COLUMN last_seen DATETIME"))
+            _conn.commit()
+    except Exception:
+        pass
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -34,7 +35,8 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-_CORS_ORIGINS = list(set(settings.ALLOWED_ORIGINS + [
+_is_wildcard = settings.ALLOWED_ORIGINS == ["*"] or "*" in settings.ALLOWED_ORIGINS
+_CORS_ORIGINS = ["*"] if _is_wildcard else list(set(settings.ALLOWED_ORIGINS + [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://192.168.1.91:5173",
