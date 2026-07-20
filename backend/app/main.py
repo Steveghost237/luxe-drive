@@ -35,14 +35,16 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-_is_wildcard = settings.ALLOWED_ORIGINS == ["*"] or "*" in settings.ALLOWED_ORIGINS
-_CORS_ORIGINS = ["*"] if _is_wildcard else list(set(settings.ALLOWED_ORIGINS + [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://192.168.1.91:5173",
-    "http://192.168.1.91:8000",
-    "http://192.168.1.91:3000",
-]))
+_raw_origins = settings.ALLOWED_ORIGINS.strip()
+if _raw_origins in ("*", '["*"]', "['*']"):
+    _CORS_ORIGINS = ["*"]
+else:
+    _parsed = [o.strip().strip('"').strip("'") for o in _raw_origins.strip("[]").split(",")]
+    _CORS_ORIGINS = list(set(_parsed + [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://192.168.1.91:5173",
+    ]))
 
 app.add_middleware(
     CORSMiddleware,
