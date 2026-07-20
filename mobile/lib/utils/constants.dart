@@ -6,7 +6,7 @@ class AppConstants {
   static const String kAppName    = 'Luxe Drive';
   static const String kAppVersion = '1.0.0';
 
-  static const String kBaseUrl           = 'http://192.168.1.91:8000'; // IP réseau locale — changer si réseau différent
+  static const String kBaseUrl           = 'https://luxe-drive-dir4.onrender.com';
   static const String kGoogleMapsApiKey  = 'VOTRE_CLE_GOOGLE_MAPS';
 
   static const int    kOtpLength         = 6;
