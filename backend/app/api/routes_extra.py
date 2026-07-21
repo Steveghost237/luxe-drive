@@ -81,6 +81,26 @@ def get_notifications(
     return q.order_by(Notification.created_at.desc()).all()
 
 
+@router.patch("/notifications/{notification_id}/lue")
+def mark_notification_read(notification_id: str, db: Session = Depends(get_db)):
+    notif = db.query(Notification).filter(Notification.id == notification_id).first()
+    if not notif:
+        raise HTTPException(status_code=404, detail="Notification non trouvée")
+    notif.est_lue = True
+    db.commit()
+    return {"ok": True}
+
+
+@router.patch("/notifications/{utilisateur_id}/tout-lire")
+def mark_all_read(utilisateur_id: str, db: Session = Depends(get_db)):
+    db.query(Notification).filter(
+        Notification.utilisateur_id == utilisateur_id,
+        Notification.est_lue == False,
+    ).update({"est_lue": True})
+    db.commit()
+    return {"ok": True}
+
+
 @router.patch("/notifications/{notification_id}/lire")
 def marquer_lue(notification_id: str, db: Session = Depends(get_db)):
     notif = db.query(Notification).filter(Notification.id == notification_id).first()

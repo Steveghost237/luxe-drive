@@ -20,9 +20,12 @@ import 'screens/vehicle_registration_screen.dart';
 import 'screens/pro_account_screen.dart';
 import 'screens/garage_partner_screen.dart';
 import 'screens/fidelite_screen.dart';
+import 'screens/notifications_screen.dart';
 import 'screens/contact_screen.dart';
 import 'screens/partenaires_screen.dart';
 import 'services/api_service.dart';
+import 'providers/notification_provider.dart';
+import 'widgets/notification_popup.dart';
 import 'utils/constants.dart';
 
 void main() {
@@ -56,8 +59,9 @@ final _router = GoRouter(
     GoRoute(path: '/inscription-vehicule',  builder: (_, __) => const VehicleRegistrationScreen()),
     GoRoute(path: '/compte-pro',            builder: (_, __) => const ProAccountScreen()),
     GoRoute(path: '/garages-partenaires',   builder: (_, __) => const GaragePartnerScreen()),
-    GoRoute(path: '/fidelite',               builder: (_, __) => const FideliteScreen()),
-    GoRoute(path: '/contact',                builder: (_, __) => const ContactScreen()),
+    GoRoute(path: '/fidelite',        builder: (_, __) => const FideliteScreen()),
+    GoRoute(path: '/notifications',    builder: (_, __) => const NotificationsScreen()),
+    GoRoute(path: '/contact',          builder: (_, __) => const ContactScreen()),
     GoRoute(path: '/partenaires',            builder: (_, __) => const PartenairesScreen()),
   ],
 );
@@ -71,12 +75,23 @@ class LuxeDriveApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => VehicleProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: MaterialApp.router(
         title: AppConstants.kAppName,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         routerConfig: _router,
+        builder: (context, child) {
+          final auth = Provider.of<AuthProvider>(context);
+          final notifProv = Provider.of<NotificationProvider>(context, listen: false);
+          if (auth.isAuthenticated && auth.user != null) {
+            notifProv.start(auth.user!.id);
+          } else {
+            notifProv.stop();
+          }
+          return NotificationOverlay(child: child ?? const SizedBox());
+        },
       ),
     );
   }

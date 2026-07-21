@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/notification_provider.dart';
 import '../utils/constants.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -58,9 +59,15 @@ class ProfileScreen extends StatelessWidget {
             _ActionTile(icon: Icons.receipt_long_outlined, label: 'Mes réservations',
               onTap: () => context.push('/reservations')),
             _ActionTile(icon: Icons.star_outline, label: 'Programme fidélité',
-              onTap: () {}),
-            _ActionTile(icon: Icons.notifications_outlined, label: 'Notifications',
-              onTap: () {}),
+              onTap: () => context.push('/fidelite')),
+            Consumer<NotificationProvider>(
+              builder: (ctx, prov, _) => _ActionTile(
+                icon: Icons.notifications_outlined,
+                label: 'Notifications',
+                badge: prov.unreadCount,
+                onTap: () => context.push('/notifications'),
+              ),
+            ),
             const SizedBox(height: 24),
 
             // Logout
@@ -118,16 +125,32 @@ class _InfoCard extends StatelessWidget {
 }
 
 class _ActionTile extends StatelessWidget {
-  final IconData icon; final String label; final VoidCallback onTap;
-  const _ActionTile({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final int badge;
+  const _ActionTile({required this.icon, required this.label, required this.onTap, this.badge = 0});
+
   @override
-  Widget build(BuildContext context) => ListTile(
-    onTap: onTap,
-    leading: Icon(icon, color: AppColors.goldPrimary),
-    title: Text(label, style: const TextStyle(color: AppColors.textPrimary)),
-    trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
-    tileColor: AppColors.darkCard,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: ListTile(
+      onTap: onTap,
+      leading: Icon(icon, color: AppColors.goldPrimary),
+      title: Text(label, style: const TextStyle(color: AppColors.textPrimary)),
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+        if (badge > 0)
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(color: AppColors.goldPrimary, borderRadius: BorderRadius.circular(10)),
+            child: Text('$badge', style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold)),
+          ),
+        const Icon(Icons.chevron_right, color: AppColors.textMuted),
+      ]),
+      tileColor: AppColors.darkCard,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    ),
   );
 }
