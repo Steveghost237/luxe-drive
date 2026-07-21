@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   ArrowRight, Car, Users, Building2, MapPin, Shield, Clock, Star,
   Satellite, CreditCard, CheckCircle2, ChevronRight, Wrench, BadgeCheck,
-  ChevronLeft, Pause, Play
+  ChevronLeft, Pause, Play, Download, Smartphone, Bell, Zap
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -664,6 +664,67 @@ export default function HomePage() {
 
             {/* Glow */}
             <div className="absolute -inset-4 bg-gold-500/5 rounded-3xl blur-2xl -z-10" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── DOWNLOAD APP SECTION ────────────────────────────────────────── */}
+      <section className="py-20 px-6 bg-gradient-to-b from-gray-950 to-black border-t border-gray-900">
+        <div className="max-w-5xl mx-auto">
+          <div className="rounded-3xl border border-gold-500/20 bg-gradient-to-br from-gold-950/30 via-gray-900 to-gray-950 p-10 md:p-14 relative overflow-hidden">
+            {/* Glow */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_0%,rgba(212,160,23,0.08),transparent)]" />
+            <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
+              {/* Left */}
+              <div>
+                <div className="inline-flex items-center gap-2 bg-gold-500/10 border border-gold-500/25 text-gold-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 uppercase tracking-widest">
+                  <Smartphone size={13} /> Application Mobile
+                </div>
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight mb-4">
+                  Luxe Drive<br />
+                  <span className="text-gold-400">dans votre poche</span>
+                </h2>
+                <p className="text-gray-400 text-sm leading-relaxed mb-8">
+                  Réservez, suivez vos courses et gérez votre compte directement depuis l'application Android.
+                  Notifications en temps réel, programme de fidélité et accès complet à la plateforme.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <a
+                    href="/luxe-drive.apk"
+                    download
+                    className="flex items-center justify-center gap-2.5 bg-gold-500 hover:bg-gold-400 text-black font-bold px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg shadow-gold-500/20 text-sm"
+                  >
+                    <Download size={18} /> Télécharger l'APK
+                  </a>
+                  <div className="flex items-center gap-2 text-gray-500 text-xs self-center">
+                    <span className="w-6 h-px bg-gray-700" />
+                    Android 8.0+ · 54 MB
+                    <span className="w-6 h-px bg-gray-700" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-xs mt-4">
+                  ⚙️ Activez <strong className="text-gray-500">«&nbsp;Sources inconnues&nbsp;»</strong> dans les paramètres Android avant l'installation.
+                </p>
+              </div>
+
+              {/* Right — feature chips */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: Bell,       label: 'Notifications',     desc: 'Alertes en temps réel' },
+                  { icon: Star,       label: 'Programme fidélité', desc: 'Points & récompenses' },
+                  { icon: Satellite,  label: 'Suivi GPS',          desc: 'Tracking de vos courses' },
+                  { icon: Zap,        label: 'Réservation rapide', desc: 'En moins de 2 minutes' },
+                  { icon: Shield,     label: 'Sécurisé',           desc: 'Données chiffrées' },
+                  { icon: CreditCard, label: 'Paiement en ligne',  desc: 'Mobile Money & carte' },
+                ].map(({ icon: Icon, label, desc }) => (
+                  <div key={label} className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 hover:border-gold-500/30 transition-colors">
+                    <Icon size={18} className="text-gold-400 mb-2" />
+                    <p className="text-white text-xs font-semibold">{label}</p>
+                    <p className="text-gray-600 text-xs mt-0.5">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>

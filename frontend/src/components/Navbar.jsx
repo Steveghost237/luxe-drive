@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X, ChevronDown, LogOut, User, LayoutDashboard, Car } from 'lucide-react'
+import { Menu, X, ChevronDown, LogOut, User, LayoutDashboard, Car, Download } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 
 const NAV_LINKS = [
@@ -77,6 +77,13 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="hidden lg:flex items-center gap-3">
+          <a
+            href="/luxe-drive.apk"
+            download
+            className="hidden xl:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-gold-500/40 text-gold-400 hover:bg-gold-500/10 transition-all"
+          >
+            <Download size={13} /> App Android
+          </a>
           {isAuthenticated ? (
             <div className="relative">
               <button
@@ -144,6 +151,10 @@ export default function Navbar() {
               {label}
             </a>
           ))}
+          <a href="/luxe-drive.apk" download
+            className="flex items-center justify-center gap-2 bg-gold-500/10 border border-gold-500/40 text-gold-400 text-sm py-3 rounded-lg font-semibold">
+            <Download size={15} /> Télécharger l'App Android
+          </a>
           <div className="flex flex-col gap-3 pt-3">
             {isAuthenticated ? (
               <>
