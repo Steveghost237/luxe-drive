@@ -7,11 +7,61 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import engine, Base, SessionLocal
 from app.api import auth, routes, routes_extra, admin, messages
+from app.core.security import hash_password
+from app.models.models import Utilisateur
 from sqlalchemy import text
+import uuid
 
 Base.metadata.create_all(bind=engine)
+
+
+def _seed_admins():
+    db = SessionLocal()
+    try:
+        admins = [
+            {
+                "email": "adminluxedrive@gmail.com",
+                "telephone": "+237600000010",
+                "nom": "Luxe Drive",
+                "prenom": "Super Admin",
+                "role": "super_admin",
+                "password": "Gentleman123",
+            },
+            {
+                "email": "jp.ondo@luxedrive.cm",
+                "telephone": "+237600000011",
+                "nom": "Ondo",
+                "prenom": "Jean-Pierre",
+                "role": "admin",
+                "password": "Admin2024",
+            },
+        ]
+        for a in admins:
+            user = db.query(Utilisateur).filter(Utilisateur.email == a["email"]).first()
+            if not user:
+                user = Utilisateur(
+                    id=str(uuid.uuid4()),
+                    email=a["email"],
+                    telephone=a["telephone"],
+                    nom=a["nom"],
+                    prenom=a["prenom"],
+                    role=a["role"],
+                    mot_de_passe_hash=hash_password(a["password"]),
+                    est_verifie=True,
+                    est_actif=True,
+                )
+                db.add(user)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"[seed_admins] {e}")
+    finally:
+        db.close()
+
+
+_seed_admins()
 
 # SQLite migration: add last_seen column if missing (SQLite only)
 if "sqlite" in settings.DATABASE_URL.lower():
