@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import {
   Car, Users, Building2, Wrench, ArrowRight, ArrowLeft,
-  Phone, User, Mail, FileText, CheckCircle2, Loader2, Shield
+  Phone, User, Mail, FileText, CheckCircle2, Loader2, Shield, Lock, Eye, EyeOff
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../utils/api'
@@ -78,8 +78,9 @@ export default function RegisterPage() {
   const [details, setDetails] = useState({
     nom: '', prenom: '', email: '', nom_entreprise: '',
     numero_permis: '', nom_garant: '', telephone_garant: '',
-    pin: '', pin_confirm: '',
+    mot_de_passe: '', mot_de_passe_confirm: '',
   })
+  const [showPwd, setShowPwd] = useState(false)
 
   const selectedRole = ROLES.find((r) => r.key === role)
 
@@ -117,15 +118,36 @@ export default function RegisterPage() {
     }
   }
 
+  // Map frontend role keys → backend roles
+  const _mapRole = (key) => {
+    if (key === 'client_physique' || key === 'client_moral') return 'client'
+    if (key === 'proprietaire') return 'proprietaire'
+    if (key === 'chauffeur')    return 'chauffeur'
+    return 'client'
+  }
+
   const handleFinish = async (e) => {
     e.preventDefault()
-    if (details.pin !== details.pin_confirm) {
-      toast.error('Les codes PIN ne correspondent pas')
+    if (details.mot_de_passe !== details.mot_de_passe_confirm) {
+      toast.error('Les mots de passe ne correspondent pas')
+      return
+    }
+    if (details.mot_de_passe.length < 6) {
+      toast.error('Le mot de passe doit comporter au moins 6 caractères')
       return
     }
     setL(true)
     try {
-      toast.success('Compte créé avec succès ! En attente de validation KYC.')
+      const { data } = await api.post('/auth/register', {
+        telephone,
+        mot_de_passe: details.mot_de_passe,
+        prenom:  details.prenom  || undefined,
+        nom:     details.nom     || undefined,
+        email:   details.email   || undefined,
+        role:    _mapRole(role),
+      })
+      login(data.utilisateur, data.access_token, data.refresh_token)
+      toast.success('Compte créé avec succès !')
       setStep(STEPS.DONE)
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Erreur lors de la création du compte')
@@ -391,26 +413,38 @@ export default function RegisterPage() {
               </>
             )}
 
-            {/* PIN security */}
+            {/* Mot de passe */}
             <div className="card-luxe p-7">
               <h3 className="font-semibold text-white mb-2 flex items-center gap-2">
-                <Shield size={16} className="text-gold-400" /> Sécurisation du compte
+                <Lock size={16} className="text-gold-400" /> Mot de passe du compte
               </h3>
               <p className="text-gray-500 text-xs mb-5">
-                Créez un code PIN à 6 chiffres pour sécuriser votre compte et valider chaque transaction.
+                Vous utiliserez ce mot de passe pour vous connecter (6 caractères minimum).
               </p>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2">Code PIN (6 chiffres)</label>
-                  <input type="password" inputMode="numeric" maxLength={6}
-                    value={details.pin} onChange={(e) => setDet('pin', e.target.value.replace(/\D/g, ''))}
-                    placeholder="••••••" className="input-luxe text-center tracking-widest" required />
+                  <label className="block text-sm text-gray-400 mb-2">Mot de passe</label>
+                  <div className="relative">
+                    <input
+                      type={showPwd ? 'text' : 'password'}
+                      value={details.mot_de_passe}
+                      onChange={(e) => setDet('mot_de_passe', e.target.value)}
+                      placeholder="Min. 6 caractères"
+                      className="input-luxe pr-10" required minLength={6} />
+                    <button type="button" onClick={() => setShowPwd(v => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      {showPwd ? <EyeOff size={15}/> : <Eye size={15}/>}
+                    </button>
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2">Confirmer le PIN</label>
-                  <input type="password" inputMode="numeric" maxLength={6}
-                    value={details.pin_confirm} onChange={(e) => setDet('pin_confirm', e.target.value.replace(/\D/g, ''))}
-                    placeholder="••••••" className="input-luxe text-center tracking-widest" required />
+                  <label className="block text-sm text-gray-400 mb-2">Confirmer</label>
+                  <input
+                    type={showPwd ? 'text' : 'password'}
+                    value={details.mot_de_passe_confirm}
+                    onChange={(e) => setDet('mot_de_passe_confirm', e.target.value)}
+                    placeholder="Répétez le mot de passe"
+                    className="input-luxe" required />
                 </div>
               </div>
             </div>
@@ -444,23 +478,22 @@ export default function RegisterPage() {
               <CheckCircle2 className="text-gold-400" size={40} />
             </div>
             <h2 className="font-display text-3xl font-bold text-white mb-3">
-              Demande envoyée !
+              Compte créé !
             </h2>
             <p className="text-gray-400 text-sm leading-relaxed mb-8">
-              Votre dossier est en cours de vérification KYC par notre équipe de conformité.
-              Vous recevrez un SMS de confirmation sous <strong className="text-white">24 à 48h ouvrées</strong>.
+              Votre compte a été créé avec succès. Vous pouvez maintenant accéder à votre espace personnel.
             </p>
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-8 text-left space-y-2">
               {[
-                '✅ Numéro de téléphone vérifié',
-                '⏳ Vérification KYC en cours',
-                '⏳ Activation du compte',
+                '✅ Compte créé et connecté',
+                '✅ Téléphone vérifié',
+                '⏳ Validation KYC en cours (24-48h)',
               ].map((s) => (
                 <p key={s} className="text-sm text-gray-400">{s}</p>
               ))}
             </div>
             <Link to="/" className="btn-gold w-full text-center py-3 block">
-              Retour à l'accueil
+              Accéder à la plateforme
             </Link>
           </div>
         )}

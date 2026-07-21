@@ -62,7 +62,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
     if body.email and db.query(Utilisateur).filter(Utilisateur.email == body.email).first():
         raise HTTPException(status_code=400, detail="Cet email est déjà utilisé")
 
-    allowed_roles = {"client", "chauffeur", "admin", "super_admin"}
+    allowed_roles = {"client", "chauffeur", "proprietaire"}
     role = body.role if body.role in allowed_roles else "client"
 
     user = Utilisateur(
